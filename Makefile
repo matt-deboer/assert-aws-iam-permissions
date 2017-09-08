@@ -16,14 +16,14 @@ test:
 	go test -v -cover -run=$(RUN) $(TEST)
 
 build: clean
-	@go build -v -o bin/$(TARGET) -ldflags "$(LD_FLAGS)+local_changes" ./pkg/server
+	@go build -v -o bin/$(TARGET) -ldflags "$(LD_FLAGS)+local_changes" ./pkg/cmd
 
 release: clean
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build \
 		-a -tags netgo \
 		-a -installsuffix cgo \
     -ldflags "$(LD_FLAGS)" \
-		-o bin/$(TARGET) ./pkg/server
+		-o bin/$(TARGET) ./pkg/cmd
 
 ca-certificates.crt:
 	@-docker rm -f assert-aws-iam-permissions_cacerts
