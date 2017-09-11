@@ -62,7 +62,7 @@ func AssertPermissions(assertions []*types.Assertion, policyJSON string) (valid 
 
 			if unexpectedResult {
 				errors++
-				msg := fmt.Sprintf("%s ( for %s [ %s ]: expected '%s', but got '%s' )",
+				msg := fmt.Sprintf("[POLICY ASSERTION FAILED] %s ( for %s [ %s ]: expected '%s', but got '%s' )",
 					assertion.Comment, aws.StringValue(result.EvalActionName),
 					aws.StringValue(result.EvalResourceName), assertion.ExpectedResult,
 					aws.StringValue(result.EvalDecision))
