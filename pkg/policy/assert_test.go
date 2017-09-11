@@ -56,7 +56,7 @@ func TestAssertBasicPermissions(t *testing.T) {
 
 	assertions := []*types.Assertion{
 		&types.Assertion{
-			ActionNames:    []string{"s3:GetObject"},
+			ActionNames:    []string{"s3:ListBucket"},
 			ResourceArns:   []string{"arn:aws:s3:::my-bucket"},
 			ExpectedResult: "allowed",
 		},
@@ -72,7 +72,7 @@ func TestAssertWildcardPermissions(t *testing.T) {
 
 	assertions := []*types.Assertion{
 		&types.Assertion{
-			ActionNames:    []string{"s3:ListBucket"},
+			ActionNames:    []string{"ec2:AssociateIamInstanceProfile"},
 			ResourceArns:   []string{"arn:aws:s3:::my-bucket/some-other-path"},
 			ExpectedResult: "implicitDeny",
 		},
@@ -82,4 +82,71 @@ func TestAssertWildcardPermissions(t *testing.T) {
 	if !valid {
 		t.Error(err)
 	}
+}
+
+const testPolicyWithContext = `
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "",
+			"Effect": "Allow",
+			"Action": [
+				"ec2:AssociateIamInstanceProfile",
+				"ec2:DescribeIamInstanceProfileAssociation",
+				"ec2:DisassociateIamInstanceProfile",
+				"ec2:ReplaceIamInstanceProfileAssociation"
+			],
+			"Resource": [ 
+				"arn:aws:ec2::123456789012:*" 
+			],
+			"Condition": {
+				"ForAllValues:StringLike": {
+						"ec2:InstanceProfile": "arn:aws:iam::123456789012:instance-profile/example/*",
+						"ec2:ResourceTag/application-group": "example"
+				},
+				"ForAllValues:StringNotLike": {
+						"ec2:InstanceProfile": "arn:aws:iam::123456789012:instance-profile/example/special-role/*"
+				}
+			}
+		}
+	]
+}
+`
+
+func TestAssertWithContextEntries(t *testing.T) {
+	assertions := []*types.Assertion{
+		&types.Assertion{
+			ActionNames:    []string{"ec2:AssociateIamInstanceProfile"},
+			ResourceArns:   []string{"arn:aws:ec2::123456789012:instance/*"},
+			ExpectedResult: "denied",
+			ContextEntries: map[string]*types.ContextEntryValue{
+				"ec2:ResourceTag/application-group": &types.ContextEntryValue{Type: "string", Values: []string{"not-example"}},
+			},
+		},
+		&types.Assertion{
+			ActionNames:    []string{"ec2:AssociateIamInstanceProfile"},
+			ResourceArns:   []string{"arn:aws:ec2::123456789012:instance/*"},
+			ExpectedResult: "denied",
+			ContextEntries: map[string]*types.ContextEntryValue{
+				"ec2:ResourceTag/application-group": &types.ContextEntryValue{Type: "string", Values: []string{"example"}},
+				"ec2:InstanceProfile":               &types.ContextEntryValue{Type: "string", Values: []string{"arn:aws:iam::123456789012:instance-profile/example/special-role/045988a5975b2dfdf"}},
+			},
+		},
+		&types.Assertion{
+			ActionNames:    []string{"ec2:AssociateIamInstanceProfile"},
+			ResourceArns:   []string{"arn:aws:ec2::123456789012:instance/*"},
+			ExpectedResult: "allowed",
+			ContextEntries: map[string]*types.ContextEntryValue{
+				"ec2:ResourceTag/application-group": &types.ContextEntryValue{Type: "string", Values: []string{"example"}},
+				"ec2:InstanceProfile":               &types.ContextEntryValue{Type: "string", Values: []string{"arn:aws:iam::123456789012:instance-profile/example/other-role/346788a5975b4gacd"}},
+			},
+		},
+	}
+
+	valid, err := AssertPermissions(assertions, testPolicyWithContext)
+	if !valid {
+		t.Error(err)
+	}
+
 }

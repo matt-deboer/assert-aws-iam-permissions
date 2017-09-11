@@ -28,9 +28,14 @@ func AssertPermissions(assertions []*types.Assertion, policyJSON string) (valid 
 
 		contextEntries := []*iam.ContextEntry{}
 		for k, v := range assertion.ContextEntries {
+			contextKeyType := "string"
+			if len(v.Type) > 0 {
+				contextKeyType = v.Type
+			}
 			contextEntries = append(contextEntries, &iam.ContextEntry{
 				ContextKeyName:   aws.String(k),
-				ContextKeyValues: aws.StringSlice(v),
+				ContextKeyValues: aws.StringSlice(v.Values),
+				ContextKeyType:   aws.String(contextKeyType),
 			})
 		}
 

@@ -22,7 +22,7 @@ USAGE:
    assert-aws-iam-permissions [global options] command [command options] [arguments...]
 
 VERSION:
-   v0.1
+   v0.2
 
 COMMANDS:
      help, h  Shows a list of commands or help for one command
@@ -38,7 +38,7 @@ GLOBAL OPTIONS:
                               "resource_owner":           "owner",
                               "caller_arn":               "caller",
                               "context_entries"": {
-                                "key": ["values"],
+                                "key": {"type": "the_type","values": ["some_values"...]},
                                 ...
                               },
                               "resource_handling_option": "option"
@@ -47,4 +47,19 @@ GLOBAL OPTIONS:
    --verbose, -V        Log debugging information [$AAIP_VERBOSE]
    --help, -h           show help
    --version, -v        print the version
+```
+
+Example Used in Terraform
+---
+
+```
+
+
+resource "aws_iam_policy" "my_policy" {
+  name     = "my_policy"
+  path     = "/${var.application-group}/application-deployer/"
+
+  policy   = "${data.external.validated-application-deployer-doer.result["policy_json"]}"
+}
+
 ```

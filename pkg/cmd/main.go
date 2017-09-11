@@ -45,7 +45,7 @@ func run(args []string, stdin io.Reader, stdout io.Writer) {
 				"resource_owner":           "owner",
 				"caller_arn":               "caller",
 				"context_entries"": {
-					"key": ["values"],
+					"key": {"type": "the_type","values": ["some_values"...]},
 					...
 				},
 				"resource_handling_option": "option"
