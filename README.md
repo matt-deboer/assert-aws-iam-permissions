@@ -22,7 +22,7 @@ USAGE:
    assert-aws-iam-permissions [global options] command [command options] [arguments...]
 
 VERSION:
-   29fd168+local_changes
+   v0.1
 
 COMMANDS:
      help, h  Shows a list of commands or help for one command
