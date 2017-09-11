@@ -38,7 +38,8 @@ func run(args []string, stdin io.Reader, stdout io.Writer) {
 		cli.StringFlag{
 			Name: "assertions",
 			Usage: `A JSON array of assertion statement objects, with the following structure:
-				"expected_result":          "allowed|implicitDeny|explicitDeny|deny|denied" // 'deny' or 'denied' can be used to catch any deny type result
+				"comment":                  "This statement should be true",
+			  "expected_result":          "allowed|implicitDeny|explicitDeny|deny|denied" // 'deny' or 'denied' can be used to catch any deny type result
 				"action_names":             ["service:Action"...],
 				"resource_arns":            ["arn:aws:..."],
 				"resource_policy":          "policy",

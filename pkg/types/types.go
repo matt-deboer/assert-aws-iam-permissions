@@ -1,6 +1,7 @@
 package types
 
 type Assertion struct {
+	Comment                string                        `json:"comment"`
 	ExpectedResult         string                        `json:"expected_result"`
 	ActionNames            []string                      `json:"action_names"`
 	ResourceArns           []string                      `json:"resource_arns"`
