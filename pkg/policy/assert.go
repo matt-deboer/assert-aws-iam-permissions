@@ -36,10 +36,11 @@ func AssertPermissions(assertions []*types.Assertion, policyJSON string) (valid 
 
 		resp, err := iamSvc.SimulateCustomPolicy(&iam.SimulateCustomPolicyInput{
 			ActionNames:     aws.StringSlice(assertion.ActionNames),
-			CallerArn:       aws.String(assertion.CallerArn),
+			ResourceArns:    aws.StringSlice(assertion.ResourceArns),
+			CallerArn:       convertStringArg(assertion.CallerArn),
 			PolicyInputList: aws.StringSlice([]string{policyJSON}),
-			ResourceOwner:   aws.String(assertion.ResourceOwner),
-			ResourcePolicy:  aws.String(assertion.ResourcePolicy),
+			ResourceOwner:   convertStringArg(assertion.ResourceOwner),
+			ResourcePolicy:  convertStringArg(assertion.ResourcePolicy),
 			ContextEntries:  contextEntries,
 		})
 
@@ -48,10 +49,17 @@ func AssertPermissions(assertions []*types.Assertion, policyJSON string) (valid 
 		}
 
 		for _, result := range resp.EvaluationResults {
-			if assertion.ExpectedResult != aws.StringValue(result.EvalDecision) {
+			evalDecision := aws.StringValue(result.EvalDecision)
+			unexpectedResult := assertion.ExpectedResult != evalDecision
+			if assertion.ExpectedResult == "deny" || assertion.ExpectedResult == "denied" {
+				unexpectedResult = !strings.HasSuffix(evalDecision, "Deny")
+			}
+
+			if unexpectedResult {
 				errors++
-				messages = append(messages, fmt.Sprintf("Expected '%s', but got '%s' for assertion %v",
-					assertion.ExpectedResult, aws.StringValue(result.EvalDecision), assertion))
+				msg := fmt.Sprintf("for %s [ %s ]: expected '%s', but got '%s'",
+					aws.StringValue(result.EvalActionName), aws.StringValue(result.EvalResourceName), assertion.ExpectedResult, aws.StringValue(result.EvalDecision))
+				messages = append(messages, msg)
 			}
 		}
 	}
@@ -60,4 +68,12 @@ func AssertPermissions(assertions []*types.Assertion, policyJSON string) (valid 
 		return false, fmt.Errorf(strings.Join(messages, ","))
 	}
 	return true, nil
+}
+
+func convertStringArg(arg string) *string {
+	var argRef *string
+	if len(arg) > 0 {
+		argRef = aws.String(arg)
+	}
+	return argRef
 }
