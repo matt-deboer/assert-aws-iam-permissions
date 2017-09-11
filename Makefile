@@ -33,8 +33,7 @@ ca-certificates.crt:
 
 docker: ca-certificates.crt
 	@echo "Building ${DOCKER_IMAGE}..."
-	@docker build -t ${DOCKER_IMAGE} -f Dockerfile.scratch .
-	@docker build -t ${DOCKER_IMAGE}-alpine -f Dockerfile.alpine .
+	@docker build -t ${DOCKER_IMAGE} -f Dockerfile .
 
 clean:
 	@rm -rf bin/
