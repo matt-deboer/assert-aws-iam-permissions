@@ -1,0 +1,35 @@
+language: go
+services:
+- docker
+go:
+- 1.8
+addons:
+  apt:
+    packages:
+    - upx-ucl
+install:
+- go get github.com/golang/dep/cmd/dep
+- dep ensure
+script:
+- make release
+- upx bin/assert-aws-iam-permissions
+after_deploy:
+- make docker VERSION=$TRAVIS_TAG
+- docker login -u $DOCKER_USER -p $DOCKER_PASS
+- export REPO=mattdeboer/assert-aws-iam-permissions
+- docker push $REPO:$TRAVIS_TAG
+- docker tag $REPO:$TRAVIS_TAG $REPO:latest
+- docker push $REPO:latest
+env:
+  global:
+  - secure: lmve01JlJeajM1L3oSqp6YPSjgAnB1Au7YnI5ZpyjO9p2H26m3ZISeuAO8y92KzasCgtoRXKn/I9DtQO43GEUvbTQnqEwzcAA6MFmD9bLHbi/v9SPKtAdOlT2/Qj1zZ2Y1eMfQxu2U2gPVOVxy8V9ocQHs9WUwrhRSUj9aDuUpKDwief0JDFU3L8qjS+4mcSRYc8ljEeV/6cf335gp2QxigS7FcMp4+7oriAcYU5y+XB07/RQqj/m+01j8ZoHcr0bFauVlscZoDxM/KQbRopQ5GGg+O/OF1N/uPIy+SIpn6q1Nyw3JRdaaXIh3+e0ACJ4dk4oDuge4SOHY0WTHqTxk6pm85aEQMCxUjU3kOsl6TBrK0tVx4PJrqC0VVilcdzRwBjq26qq1d1H/kSBu/ffrQ1lRNv7sMJqZF9W5a4Lui/t9ESxjb+9o37GyF8TpF+CmmYVi9k1Vz2zO4pMAANcXq+IguWTkPNbC3h5FWGZEslarvW8HnLkKG1SF5m53di+mPLObh1aEyxGZWrpr106uxbWxjmUORebkSVfdf4QLkbL9G/fERszgHjKaBSP3aNafIgui/bryNALj1PZXHPdzDCbI9tcvmQGg+s00AgBWpdUAdwT61RjPvaoKZPFdvxPBXyxJk33kaPQJuF0cJ6O2Kjsr+uQAUj8RQ4V38jGI0=
+  - secure: SrREkhS5vFf8NCiyxYROhMUhnNQrj5FwT4Xv5IWVXp9aQrAncbsX3y0WAQXvetQ+c/aCAMF9WdptPuELjvIlplFezNBosENcnAO1+Fag5hNdCOScrt1X962Io0O+nSr/b0G2SoaTITz1nX+UnmyFw9AadpY3FiYsAP7x2I4tP84XM5Pr1bCyONxpa1NEO2ve2C3e9/xa6xbUszEip09Wsba6z3R1S0P28de8YNaPqOT7QFg48ny7ajH0WH539ZJhT6ikk6wOzYIyNrI9UCwVx2I7zXQKRIg78T/0FsYglD3QzVVCm1Broj6OGZ0asnW+NT9lG3irK8zbpkhEkWnglYEAYXSvfFnaACchQ84grtEKVhkHUf0Vl9nlHzNSyqo+vZO/vAcvhUD2o7rgMsGRKB/CIttrVIymzDTvcDwuN/OiRL2TwuIeKr1sbxl/JfmLI4+aRdj+YsMqEC6MzdnKQhUhV83J2sA935Q5RproaukI+bcaIix3tFgG6h/t2jw5Dl6ygKj3DoRDwnX8x0LxPU/n38MnyYp4A2D2d6wVYjqbRwYaByX3Mj3rfSr3Q7a7JjE9akyZC2yVN+vxAtyhaHeAwHZvEFgqCqzY9Xj30TZ8gRQBGMDRVzM+YamOn88cW1XngfJ2FeDtZKsmnvrS5OReY5BL1KT4MHFnXV57XQ0=
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: p2ER+ldT8/I8TGS+4AgNu3sf/qrcimLGwiGLkLS/b155rV4GzhPNzmsC0KmV41v0mmxncMg5UmUrhr7CZgGMq84+2HUnagepUWi+AJ4XAivea6yXUqDD4yahBImKXcBp5AjpGVjf8ylwi2y3LOxesozJNJSA+DpRt+96u91PEG+4XS0KZYwGlRjCDLz1QPJD0s9X4WMXOgWxOMR6mkz3foYnSP9y4Z68YVTC5YHdWa68b4dgoUNiITPqbYx9MS+hAswCuwAVbr02+kC3D0GJ3V9d6b3V72Ztt78Q6eEEmAC5qNtYfBuEg1OaNyf1/34E28YWRz8/eNw6NmpklMkMZXs3jhYPOO1cqOetXxGbwBIoQ5cxWaz2d2RWxEbf/UxOUw9Cny/QyTPtIY5EpBoJ3hYWQv4T9qQW7ofvy48fR+CDKTNY4JEq407HJZCxcCKCqhWTVqZowM5IrA4YjP8+yYcDiHWFKXhrsVAxMIZixy0BrII2fqrhzali3R7TR443INXYQC6fb6V/+87pltnf63LnCibPPAS6ET+QZPgVknNE7hPYx/o2DYll6bwfpL4dex6WySngavwWW6hHluqM6XYNtuborv6nUb5cA2HJr8HI4eMfy7iVEpwszPP8HbwGRcxf1Or0fPadXshVerrtlbeVlRjdm1HwbRdeGcRQmSc=
+  file: bin/assert-aws-iam-permissions
+  on:
+    repo: matt-deboer/assert-aws-iam-permissions
+    tags: true
