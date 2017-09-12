@@ -53,13 +53,42 @@ Example Used in Terraform
 ---
 
 ```
+data "aws_iam_policy_document" "my_policy" {
+  statement {
+    actions = [
+      "s3:Get*",
+    ]
+    effect = "Allow"
+    resources = ["*"]
+  }
+}
 
+data "external" "validated_policy" {
+  program = [ "assert-aws-iam-permissions", "--read-stdin" ]
+  query = {
+    policy_json = "${data.aws_iam_policy_document.my_policy.json}"
+    assertions = <<EOF
+      [
+        {
+          "comment": "can write to a sub-path in 'my-bucket'",
+          "expected_result": "allowed",
+          "action_names": [
+            "s3:GetObject"
+          ],
+          "resource_arns": [
+            "arn:aws:s3:::my-bucket/some-sub-path"
+          ]
+        }
+      ]
+    EOF
+  }
+}
 
+# we create the actual policy via the validated policy document
+# policy creation will fail if it doesn't grant the asserted permissions
 resource "aws_iam_policy" "my_policy" {
   name     = "my_policy"
-  path     = "/${var.application-group}/application-deployer/"
-
-  policy   = "${data.external.validated-application-deployer-doer.result["policy_json"]}"
+  policy   = "${data.external.validated_policy.result["policy_json"]}"
 }
 
 ```
