@@ -52,7 +52,10 @@ GLOBAL OPTIONS:
 Example Used in Terraform
 ---
 
-```
+This policy document example is trivial to evaluate, but it demonstrates configuration in terraform
+for use in more complex policy scenarios.
+
+```hcl
 data "aws_iam_policy_document" "my_policy" {
   statement {
     actions = [
