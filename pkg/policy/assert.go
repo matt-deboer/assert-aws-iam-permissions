@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/matt-deboer/assert-aws-iam-permissions/pkg/types"
@@ -12,14 +13,19 @@ import (
 
 // AssertPermissions evaluates the provided set of assertions against the
 // provided policy document
-func AssertPermissions(assertions []*types.Assertion, policyJSON string) (valid bool, err error) {
+func AssertPermissions(assertions []*types.Assertion, policyJSON string, assumeRoleARN string) (valid bool, err error) {
 
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
 
-	// Create a IAM service client.
-	iamSvc := iam.New(sess)
+	var iamSvc *iam.IAM
+	if len(assumeRoleARN) > 0 {
+		creds := stscreds.NewCredentials(sess, assumeRoleARN)
+		iamSvc = iam.New(sess, &aws.Config{Credentials: creds})
+	} else {
+		iamSvc = iam.New(sess)
+	}
 
 	errors := 0
 	messages := []string{}

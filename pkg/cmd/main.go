@@ -53,6 +53,11 @@ func run(args []string, stdin io.Reader, stdout io.Writer) {
 				if empty, assertions are read from JSON on stdin (under the key "assertions")`,
 			EnvVar: prefix + "ASSERTIONS",
 		},
+		cli.StringFlag{
+			Name:   "assume-role-arn",
+			Usage:  `The ARN of the role to assume when making AWS API calls`,
+			EnvVar: prefix + "ASSUME_ROLE_ARN",
+		},
 		cli.BoolFlag{
 			Name:   "read-stdin, i",
 			Usage:  "whether to read inputs from stdin",
@@ -98,7 +103,7 @@ func run(args []string, stdin io.Reader, stdout io.Writer) {
 		if len(inputs.PolicyJSON) == 0 {
 			argError(c, "'policy-json' is required")
 		}
-		_, err := policy.AssertPermissions(inputs.Assertions, inputs.PolicyJSON)
+		_, err := policy.AssertPermissions(inputs.Assertions, inputs.PolicyJSON, c.String("assume-role-arn"))
 		if err != nil {
 			log.Fatal(err)
 		}
