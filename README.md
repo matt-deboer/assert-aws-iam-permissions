@@ -70,7 +70,7 @@ data "external" "validated_policy" {
     assertions = <<EOF
       [
         {
-          "comment": "can write to a sub-path in 'my-bucket'",
+          "comment": "can read from a sub-path in 'my-bucket'",
           "expected_result": "allowed",
           "action_names": [
             "s3:GetObject"
