@@ -12,7 +12,7 @@ install:
 - dep ensure
 script:
 - make release
-- upx bin/assert-aws-iam-permissions
+- upx bin/linux-amd64-assert-aws-iam-permissions
 after_deploy:
 - make docker VERSION=$TRAVIS_TAG
 - docker login -u $DOCKER_USER -p $DOCKER_PASS
@@ -25,7 +25,8 @@ deploy:
   skip_cleanup: true
   api_key:
     secure: p2ER+ldT8/I8TGS+4AgNu3sf/qrcimLGwiGLkLS/b155rV4GzhPNzmsC0KmV41v0mmxncMg5UmUrhr7CZgGMq84+2HUnagepUWi+AJ4XAivea6yXUqDD4yahBImKXcBp5AjpGVjf8ylwi2y3LOxesozJNJSA+DpRt+96u91PEG+4XS0KZYwGlRjCDLz1QPJD0s9X4WMXOgWxOMR6mkz3foYnSP9y4Z68YVTC5YHdWa68b4dgoUNiITPqbYx9MS+hAswCuwAVbr02+kC3D0GJ3V9d6b3V72Ztt78Q6eEEmAC5qNtYfBuEg1OaNyf1/34E28YWRz8/eNw6NmpklMkMZXs3jhYPOO1cqOetXxGbwBIoQ5cxWaz2d2RWxEbf/UxOUw9Cny/QyTPtIY5EpBoJ3hYWQv4T9qQW7ofvy48fR+CDKTNY4JEq407HJZCxcCKCqhWTVqZowM5IrA4YjP8+yYcDiHWFKXhrsVAxMIZixy0BrII2fqrhzali3R7TR443INXYQC6fb6V/+87pltnf63LnCibPPAS6ET+QZPgVknNE7hPYx/o2DYll6bwfpL4dex6WySngavwWW6hHluqM6XYNtuborv6nUb5cA2HJr8HI4eMfy7iVEpwszPP8HbwGRcxf1Or0fPadXshVerrtlbeVlRjdm1HwbRdeGcRQmSc=
-  file: bin/assert-aws-iam-permissions
+  file_glob: true
+  file: bin/*
   on:
     repo: matt-deboer/assert-aws-iam-permissions
     tags: true
