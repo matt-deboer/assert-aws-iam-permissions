@@ -103,6 +103,9 @@ func run(args []string, stdin io.Reader, stdout io.Writer) {
 			if len(stdinInputs.PolicyJSON) > 0 {
 				inputs.PolicyJSON = stdinInputs.PolicyJSON
 			}
+			if stdinInputs.MaxLength > 0 {
+				inputs.MaxLength = stdinInputs.MaxLength
+			}
 		}
 		if len(inputs.Assertions) == 0 {
 			argError(c, "'assertions' is required")
