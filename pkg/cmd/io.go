@@ -43,7 +43,21 @@ func parseInput(stdin io.Reader) *types.Inputs {
 		}
 
 		if maxLength, ok := inputsMap["max_length"]; ok {
-			inputs.MaxLength = int(maxLength.(float64))
+			switch maxLength.(type) {
+			case float64:
+				inputs.MaxLength = int(maxLength.(float64))
+				break
+			case string:
+				var convError error
+				inputs.MaxLength, convError = strconv.Atoi(maxLength.(string))
+				if convError != nil {
+					log.Fatalf("Error unmarshaling inputs.max_length; %v", convError)
+				}
+				break
+			case int64:
+				inputs.MaxLength = int(maxLength.(int64))
+				break
+			}
 		}
 	}
 	return &inputs
