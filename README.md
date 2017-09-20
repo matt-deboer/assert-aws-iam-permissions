@@ -76,6 +76,7 @@ data "external" "validated_policy" {
   program = [ "assert-aws-iam-permissions", "--read-stdin" ]
   query = {
     policy_json = "${data.aws_iam_policy_document.my_policy.json}"
+    max_length = 5120
     assertions = <<EOF
       [
         {
