@@ -2,6 +2,7 @@ package policy
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -13,19 +14,9 @@ import (
 
 // AssertPermissions evaluates the provided set of assertions against the
 // provided policy document
-func AssertPermissions(assertions []*types.Assertion, policyJSON string, assumeRoleARN string) (valid bool, err error) {
+func AssertPermissions(assertions []*types.Assertion, policyJSON string, assumeRoleARN string) error {
 
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-
-	var iamSvc *iam.IAM
-	if len(assumeRoleARN) > 0 {
-		creds := stscreds.NewCredentials(sess, assumeRoleARN)
-		iamSvc = iam.New(sess, &aws.Config{Credentials: creds})
-	} else {
-		iamSvc = iam.New(sess)
-	}
+	iamSvc := initIAM(assumeRoleARN)
 
 	errors := 0
 	messages := []string{}
@@ -56,7 +47,7 @@ func AssertPermissions(assertions []*types.Assertion, policyJSON string, assumeR
 		})
 
 		if err != nil {
-			return false, err
+			return err
 		}
 
 		for _, result := range resp.EvaluationResults {
@@ -78,9 +69,9 @@ func AssertPermissions(assertions []*types.Assertion, policyJSON string, assumeR
 	}
 
 	if errors > 0 {
-		return false, fmt.Errorf(strings.Join(messages, ","))
+		return fmt.Errorf(strings.Join(messages, ","))
 	}
-	return true, nil
+	return nil
 }
 
 func convertStringArg(arg string) *string {
@@ -89,4 +80,29 @@ func convertStringArg(arg string) *string {
 		argRef = aws.String(arg)
 	}
 	return argRef
+}
+
+// AssertPolicyLength evaluates the length of the policy document (excluding whitespace) against
+// the expected maximum length
+func AssertPolicyLength(maxLength int, policyJSON string) error {
+	length := len(regexp.MustCompile(`\s+`).ReplaceAllString(policyJSON, ""))
+	if length > maxLength {
+		return fmt.Errorf("Policy document is %d characters over the expected limit of %d", (length - maxLength), maxLength)
+	}
+	return nil
+}
+
+func initIAM(assumeRoleARN string) *iam.IAM {
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+
+	var iamSvc *iam.IAM
+	if len(assumeRoleARN) > 0 {
+		creds := stscreds.NewCredentials(sess, assumeRoleARN)
+		iamSvc = iam.New(sess, &aws.Config{Credentials: creds})
+	} else {
+		iamSvc = iam.New(sess)
+	}
+	return iamSvc
 }

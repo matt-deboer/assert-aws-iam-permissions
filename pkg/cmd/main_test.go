@@ -111,6 +111,7 @@ func TestAssertBasicPermissions(t *testing.T) {
 				"expected_result": "allowed"
 			}
 		],
+		"max_length": 1024,
 		"policy_json": %s
 	}
 	`, strconv.Quote(testPolicy)))
@@ -131,6 +132,7 @@ func TestAssertBasicPermissions_QuotedPolicy(t *testing.T) {
 					\"expected_result\": \"allowed\"
 				}
 			]",
+			"max_length": 5120,
 			"policy_json": "%s"
 		}
 		`, quotedTestPolicy))

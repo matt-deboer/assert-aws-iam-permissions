@@ -35,6 +35,12 @@ func run(args []string, stdin io.Reader, stdout io.Writer) {
 			assertions are read from JSON on stdin (under the key "policy_json")`,
 			EnvVar: prefix + "POLICY_JSON",
 		},
+		cli.IntFlag{
+			Name: "max-length",
+			Usage: `The maximum expected character length of the policy document (excluding whitespace);
+			a document greater than this length will cause an assertion failure`,
+			EnvVar: prefix + "MAX_LENGTH",
+		},
 		cli.StringFlag{
 			Name: "assertions",
 			Usage: `A JSON array of assertion statement objects, with the following structure:
@@ -78,6 +84,7 @@ func run(args []string, stdin io.Reader, stdout io.Writer) {
 		var inputs types.Inputs
 		policyJSONString := c.String("policy-json")
 		assertionsString := c.String("assertions")
+		maxLength := c.Int("max-length")
 
 		if len(policyJSONString) > 0 {
 			inputs.PolicyJSON = policyJSONString
@@ -103,7 +110,15 @@ func run(args []string, stdin io.Reader, stdout io.Writer) {
 		if len(inputs.PolicyJSON) == 0 {
 			argError(c, "'policy-json' is required")
 		}
-		_, err := policy.AssertPermissions(inputs.Assertions, inputs.PolicyJSON, c.String("assume-role-arn"))
+
+		if maxLength > 0 {
+			err := policy.AssertPolicyLength(maxLength, inputs.PolicyJSON)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		err := policy.AssertPermissions(inputs.Assertions, inputs.PolicyJSON, c.String("assume-role-arn"))
 		if err != nil {
 			log.Fatal(err)
 		}

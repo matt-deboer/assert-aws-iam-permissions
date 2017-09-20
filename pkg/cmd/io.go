@@ -26,20 +26,24 @@ func parseInput(stdin io.Reader) *types.Inputs {
 		data = []byte(sanitizedInputs)
 
 		// try the pieces individually, in case each of the parameters is a separate (quoted) JSON document
-		inputsMap := make(map[string]string)
+		inputsMap := make(map[string]interface{})
 		err2 := json.Unmarshal(data, &inputsMap)
 		if err2 != nil {
 			log.Fatalf("Error unmarshaling inputs json; %v", err2)
 		}
 		if policyJSON, ok := inputsMap["policy_json"]; ok {
-			inputs.PolicyJSON = policyJSON
+			inputs.PolicyJSON = policyJSON.(string)
 		}
 
 		if assertions, ok := inputsMap["assertions"]; ok {
-			err := json.Unmarshal([]byte(assertions), &inputs.Assertions)
+			err := json.Unmarshal([]byte(assertions.(string)), &inputs.Assertions)
 			if err != nil {
 				log.Fatalf("Error unmarshaling inputs.assertions; %v", err)
 			}
+		}
+
+		if maxLength, ok := inputsMap["max_length"]; ok {
+			inputs.MaxLength = int(maxLength.(float64))
 		}
 	}
 	return &inputs

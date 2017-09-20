@@ -20,4 +20,5 @@ type ContextEntryValue struct {
 type Inputs struct {
 	Assertions []*Assertion `json:"assertions"`
 	PolicyJSON string       `json:"policy_json"`
+	MaxLength  int          `json:"max_length"`
 }
