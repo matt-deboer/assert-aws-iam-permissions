@@ -84,7 +84,7 @@ func run(args []string, stdin io.Reader, stdout io.Writer) {
 		var inputs types.Inputs
 		policyJSONString := c.String("policy-json")
 		assertionsString := c.String("assertions")
-		maxLength := c.Int("max-length")
+		inputs.MaxLength = c.Int("max-length")
 
 		if len(policyJSONString) > 0 {
 			inputs.PolicyJSON = policyJSONString
@@ -111,8 +111,8 @@ func run(args []string, stdin io.Reader, stdout io.Writer) {
 			argError(c, "'policy-json' is required")
 		}
 
-		if maxLength > 0 {
-			err := policy.AssertPolicyLength(maxLength, inputs.PolicyJSON)
+		if inputs.MaxLength > 0 {
+			err := policy.AssertPolicyLength(inputs.MaxLength, inputs.PolicyJSON)
 			if err != nil {
 				log.Fatal(err)
 			}
