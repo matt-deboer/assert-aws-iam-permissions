@@ -22,31 +22,35 @@ USAGE:
    assert-aws-iam-permissions [global options] command [command options] [arguments...]
 
 VERSION:
-   v0.2
+   v0.6
 
 COMMANDS:
      help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --policy-json value  The full contents of the IAM policy document; if empty,
-                            assertions are read from JSON on stdin (under the key "policy_json") [$AAIP_POLICY_JSON]
-   --assertions value   A JSON array of assertion statement objects, with the following structure:
-                              "expected_result":          "allowed|implicitDeny|explicitDeny|deny|denied" // 'deny' or 'denied' can be used to catch any deny type result
-                              "action_names":             ["service:Action"...],
-                              "resource_arns":            ["arn:aws:..."],
-                              "resource_policy":          "policy",
-                              "resource_owner":           "owner",
-                              "caller_arn":               "caller",
-                              "context_entries"": {
-                                "key": {"type": "the_type","values": ["some_values"...]},
-                                ...
-                              },
-                              "resource_handling_option": "option"
-                              if empty, assertions are read from JSON on stdin (under the key "assertions") [$AAIP_ASSERTIONS]
-   --read-stdin, -i     whether to read inputs from stdin [$AAIP_READ_STDIN]
-   --verbose, -V        Log debugging information [$AAIP_VERBOSE]
-   --help, -h           show help
-   --version, -v        print the version
+   --policy-json value      The full contents of the IAM policy document; if empty,
+                                assertions are read from JSON on stdin (under the key "policy_json") [$AAIP_POLICY_JSON]
+   --max-length value       The maximum expected character length of the policy document (excluding whitespace);
+                                a document greater than this length will cause an assertion failure (default: 0) [$AAIP_MAX_LENGTH]
+   --assertions value       A JSON array of assertion statement objects, with the following structure:
+                                  "comment":                  "This statement should be true",
+                                  "expected_result":          "allowed|implicitDeny|explicitDeny|deny|denied" // 'deny' or 'denied' can be used to catch any deny type result
+                                  "action_names":             ["service:Action"...],
+                                  "resource_arns":            ["arn:aws:..."],
+                                  "resource_policy":          "policy",
+                                  "resource_owner":           "owner",
+                                  "caller_arn":               "caller",
+                                  "context_entries"": {
+                                    "key": {"type": "the_type","values": ["some_values"...]},
+                                    ...
+                                  },
+                                  "resource_handling_option": "option"
+                                  if empty, assertions are read from JSON on stdin (under the key "assertions") [$AAIP_ASSERTIONS]
+   --assume-role-arn value  The ARN of the role to assume when making AWS API calls [$AAIP_ASSUME_ROLE_ARN]
+   --read-stdin, -i         whether to read inputs from stdin [$AAIP_READ_STDIN]
+   --verbose, -V            Log debugging information [$AAIP_VERBOSE]
+   --help, -h               show help
+   --version, -v            print the version
 ```
 
 Example Used in Terraform
